@@ -1,0 +1,147 @@
+package com;
+
+
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+
+/**
+ * Created by Nypro_PC on 09/09/2015.
+ * Modified by Ose'elixir.
+ */
+public class ScriptParser{
+
+    Scanner input, nu;
+    
+    public void display(){
+
+        try {
+            input = new Scanner(new File("code2.txt"));
+            int lineNumber = 1;
+            
+            while(input.hasNextLine()){
+                
+                String value = input.nextLine();
+                
+                
+                //For lines that start with func
+                if(value.startsWith("func")||value.startsWith("\t")){
+                    int switcher = (value.startsWith("func")? 1:2);
+                    
+                    switch(switcher){
+                        case 1:
+                            System.out.println("-Line "+ lineNumber + ", Expression \"" + value + "\" is a function call");
+                            break;
+                        case 2:
+                            if(value.matches("\t[v][a][r].*")){
+                                int switches = (value.contains("=")? 1:2);
+                                switch(switches){
+                                    case 1:
+                                        System.out.println("-Line "+ lineNumber + ", Expression \"var "+ value + "\" is a Variable Declaration and Instantiation in a function");
+                                        break;
+                                    case 2:
+                                        System.out.println("-Line "+ lineNumber + ", Expression \"var "+ value + "\" is a Variable Declaration in a function");
+                                        break;
+                                }
+
+                            }
+                            if(value.matches("\t[r][e][t].*")){
+                                System.out.println("-Line "+ lineNumber + ", Expression \"var"+ value + "\" is a return statement for the function");
+                            }
+                            
+                            break;
+                        }
+                }
+                //For lines that start with var
+                if(value.startsWith("var")){
+                    
+                    if(value.contains(",")&&value.contains("=")){
+                       // System.out.println("Variable declaration in line " + lineNumber)
+                                String inner  = value;
+                                String[] varArray = inner.split("[,=]");
+                                int varNum = varArray.length;
+                    //System.out.println("With variables ");
+                        
+                                for(int i = 0; i < varNum-1; i++){
+                            String newValue = varArray[i].replaceAll(".*var", "");
+                            System.out.println("-Line "+ lineNumber + ", Expression \"var "+ newValue + " = " + varArray[varNum-1] + "\" is a Variable Declaration and Instantiation");
+                        }
+                    }
+                    
+                    if(value.contains("=")&&!value.contains(",")){ 
+                        
+                                String inner  = value;
+                                String[] varArray1 = inner.split("[=]");
+                                int varNum1 = varArray1.length;
+
+                        for(int i = 0; i < varNum1-1; i++){
+                            String newValue = varArray1[i].replaceAll(".*var", " ");
+                            System.out.println("-Line "+ lineNumber + ", Expression \"var "+ newValue + " = " + varArray1[varNum1-1] + "\" is a Variable Declaration and Instantiation");
+                        }
+                    }
+                    if(value.contains(",")&&!value.contains("=")){ 
+                        
+                                String inner  = value;
+                                String[] varArray1 = inner.split("[,]");
+                                int varNum1 = varArray1.length;
+
+                        for(int i = 0; i < varNum1; i++){
+                            String newValue = varArray1[i].replaceAll(".*var", " ");
+                            System.out.println("-Line "+ lineNumber + ", Expression \"var " + newValue + "\" is a Variable Declaration");
+                        }
+                    }
+                    
+                    if(!value.contains(",")&&!value.contains("=")){
+                        String newValue = value.replaceAll(".*var", " ");
+                        System.out.println("-Line "+ lineNumber + ", Expression \"var "+ newValue +  "\" is a Variable Declaration");
+                        
+                    }
+                 
+                } 
+                
+                //For lines that start with a non-keyword
+                if(value.isEmpty()){
+                    
+                }else{
+                    if(!value.startsWith("var")&&!value.startsWith("func")){
+                        nu = new Scanner(value);
+
+
+                        //this detects a function called
+                        if(nu.next().matches(".*\\w[(][)].*")){
+                            String function = value;
+                             System.out.println("-Line "+ lineNumber + ", Expression \""+ function + "\" is a function call");
+                            //System.out.println("The function  " + function + " is called in line " + lineNumber);
+                        }else{
+                            
+                            if(nu.next().matches(".*[+-].*")){
+                                if(value.contains("+=")||value.contains("=+")||value.contains("-=")||value.contains("=-")){
+                                    String function = value;
+                                    System.out.println("-Line "+ lineNumber + ", Expression \""+ function + "\" is a self-addition");
+                                }else{
+                                
+                                    String function = value;
+                                    System.out.println("-Line "+ lineNumber + ", Expression \""+ function + "\" is a variable manipulation");
+                                }
+                            }
+                        }
+
+                    }
+                }
+                
+                lineNumber++;
+                
+            }
+            
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ScriptParser.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+      
+
+}
